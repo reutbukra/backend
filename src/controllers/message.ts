@@ -1,50 +1,44 @@
+import Message from "../models/message_model"
+import request from "../request"
+import response from "../response"
+import error from "../error"
 
-import Student from '../models/student_model'
-import { Request, Response } from 'express'
-
-
-
-const getAllStudents = async (req: Request, res: Response) => {
-    console.log('getAllStudents')
-
+const getAllMessages = async (req: request) => {
+    // implement the get all messages with specific sender
     try {
-        let students = {}
-        students = await Student.find()
-        res.status(200).send(students)
+        let messages = {};
+
+        if (req.query != null && req.query.sender != null) {
+            messages = await Message.find({ sender: req.query.sender })
+        } else {
+            messages = await Message.find()
+        }
+        return new response(messages, req.userId, null)
     } catch (err) {
-        res.status(400).send({ 'error': "fail to get posts from db" })
+        console.log("err");
+        return new response(null, req.userId, new error(400, err.message))
     }
 }
 
-const getStudentById = async (req: Request, res: Response) => {
-    console.log(req.params.id)
-    try {
-        const students = await Student.findById(req.params.id)
-        res.status(200).send(students)
-    } catch (err) {
-        res.status(400).send({ 'error': "fail to get posts from db" })
-    }
-}
-
-
-const addNewStudent = async (req: Request, res: Response) => {
-    console.log(req.body)
-
-    const student = new Student({
-        _id: req.body._id,
-        name: req.body.name,
-        avatarUrl: req.body.avatarUrl,
+const addNewMessage = async (req: request) => {
+    const message = new Message({
+        message: req.body["message"],
+        sender: req.userId,
     })
+    console.log("end creation new message")
+    console.log("message is: " + req.body["message"])
+    console.log("sender is: " + req.userId)
 
     try {
-        const newStudent = await student.save()
-        console.log("save student in db")
-        res.status(200).send(newStudent)
+        const newMessage = await message.save()
+        console.log("save message in db")
+        return new response(newMessage, req.userId, null)
     } catch (err) {
-        console.log("fail to save student in db " + err)
-        res.status(400).send({ 'error': 'fail adding new post to db' })
+        console.log("saving message in db failed")
+        console.log(err)
+
+        return new response(null, req.userId, new error(400, err.message))
     }
 }
 
-
-export = { getAllStudents, getStudentById, addNewStudent }
+export = { getAllMessages, addNewMessage }

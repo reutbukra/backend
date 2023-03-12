@@ -9,6 +9,7 @@ import express from 'express'
 const router = express.Router()
 import post from '../controllers/post.js'
 import auth from '../controllers/auth.js'
+import request from "../request"
 
 /**
 * @swagger
@@ -19,6 +20,7 @@ import auth from '../controllers/auth.js'
 *       required:
 *         - message
 *         - sender
+*         - imageUrl
 *       properties:
 *         message:
 *           type: string
@@ -26,10 +28,16 @@ import auth from '../controllers/auth.js'
 *         sender:
 *           type: string
 *           description: The sending user id
+*         imageUrl:
+*           type: string
+*           description: The post's image url
+
 *       example:
 *         message: 'this is my new post'
 *         sender: '12342345234556'
+*         imageUrl: ''
 */
+
 
 /**
  * @swagger
@@ -56,7 +64,19 @@ import auth from '../controllers/auth.js'
  *                  $ref: '#/components/schemas/Post'
  *  
  */
-router.get('/', post.getAllPosts)
+router.get("/", auth.authenticateMiddleware, async (req, res) => {
+    try {
+        const response = await post.getAllPosts(request.fromRestRequest(req))
+        response.sendRestResponse(res)
+    } catch (err) {
+        res.status(400).send({
+            status: "fail",
+            message: err.message,
+        })
+    }
+})
+
+
 
 /**
  * @swagger
@@ -82,7 +102,21 @@ router.get('/', post.getAllPosts)
  *               $ref: '#/components/schemas/Post'
  *  
  */
-router.get('/:id', auth.authenticateMiddleware, post.getPostById)
+router.get("/:id", auth.authenticateMiddleware, async (req, res) => {
+    console.log('!!!')
+    try {
+        const response = await post.getPostById(request.fromRestRequest(req))
+        response.sendRestResponse(res)
+    } catch (err) {
+        res.status(400).send({
+            status: "fail",
+            message: err.message,
+        })
+    }
+})
+
+// router.put("/:id", auth.authenticateMiddleware, post.updatePostById);
+
 
 /**
  * @swagger
@@ -107,7 +141,17 @@ router.get('/:id', auth.authenticateMiddleware, post.getPostById)
  *               $ref: '#/components/schemas/Post'
  *  
  */
-router.post('/', auth.authenticateMiddleware, post.addNewPost)
+router.post("/", auth.authenticateMiddleware, async (req, res) => {
+    try {
+        const response = await post.addNewPost(request.fromRestRequest(req))
+        response.sendRestResponse(res)
+    } catch (err) {
+        res.status(400).send({
+            status: "fail",
+            message: err.message,
+        })
+    }
+})
 
 
 /**
@@ -140,6 +184,58 @@ router.post('/', auth.authenticateMiddleware, post.addNewPost)
  *               $ref: '#/components/schemas/Post'
  *  
  */
-router.put('/:id', auth.authenticateMiddleware, post.putPostById)
+router.put("/:id",  async (req, res) => {
+    console.log("updatePostById here")
+    try {
+        const response = await post.updatePostById(request.fromRestRequest(req))
+        response.sendRestResponse(res);
+    } catch (err) {
+        res.status(400).send({
+            status: "fail",
+            message: err.message,
+        })
+    }
+})
+
+
+/**
+ * @swagger
+ * /post/{id}:
+ *   delete:
+ *     summary: delete post by id
+ *     tags: [Post]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         requiered: true
+ *         schema:
+ *           type: string
+ *           description: the requested post id
+ *     responses:
+ *       200:
+ *         description: the requested post
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Post'
+ *
+ */
+
+router.delete("/:id", auth.authenticateMiddleware, async (req, res) => {
+    console.log('1111?')
+    try {
+        const response = await post.deletePostById(
+            request.fromRestRequest(req)
+        );
+        response.sendRestResponse(res);
+    } catch (err) {
+        res.status(400).send({
+            status: "fail",
+            message: err.message,
+        });
+    }
+});
 
 export = router

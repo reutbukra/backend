@@ -1,5 +1,3 @@
-
-
 import express from 'express'
 const router = express.Router()
 import auth from '../controllers/auth.js'
@@ -30,6 +28,8 @@ import auth from '../controllers/auth.js'
 *       required:
 *         - email
 *         - password
+*         - imageUrl
+*         - name
 *       properties:
 *         email:
 *           type: string
@@ -37,10 +37,19 @@ import auth from '../controllers/auth.js'
 *         password:
 *           type: string
 *           description: The user password
+*         name:
+*           type: string
+*           description: The user name
+*         image:
+*           type: string
+*           description: The user's profile picture url
 *       example:
 *         email: 'bob@gmail.com'
 *         password: '123456'
+*         name: 'Bob'
+*         image: ''
 */
+
 
 /**
  * @swagger
@@ -71,7 +80,7 @@ import auth from '../controllers/auth.js'
  *                 description: The error description 
  *  
  */
-router.post('/register',auth.register)
+router.post('/register', auth.register)
 
 
 /**
@@ -103,8 +112,22 @@ router.post('/register',auth.register)
  *               refresh_token: '123456...'
  *
  */
-router.post('/login',auth.login)
+router.post('/login', auth.login)
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   get:
+ *     summary: logout user invalidate refresh token
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: logout sucess, refresh token is invalidated
+ *
+ */
+router.get('/logout', auth.logout)
 
 /**
  * @swagger
@@ -131,25 +154,64 @@ router.post('/login',auth.login)
  *               refresh_token: '123456...'
  *
  */
-router.get('/refresh',auth.refresh)
+router.get('/refresh', auth.refresh)
+
+
 
 
 /**
  * @swagger
- * /auth/logout:
+ * /auth/{id}:
  *   get:
- *     summary: logout user invalidate refresh token
+ *     summary: get user by id
  *     tags: [Auth]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         requiered: true
+ *         schema:
+ *           type: string
+ *           description: the requested user id
  *     responses:
  *       200:
- *         description: logout sucess, refresh token is invalidated
+ *         description: the requested user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
  *
  */
-router.get('/logout',auth.logout)
+router.get('/:id', auth.authenticateMiddleware, auth.getUserById) 
+// TODO - need to add test for getUserById in the auth.test.ts
+
+
+
+/**
+ * @swagger
+ * /auth/{id}:
+ *   put:
+ *     summary: update user by id
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         requiered: true
+ *         schema:
+ *           type: string
+ *           description: the updated user id
+ *     responses:
+ *       200:
+ *         description: the updated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *
+ */
+router.put("/:id", auth.authenticateMiddleware, auth.updateUserById);
 
 export = router
-
-
-

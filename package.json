@@ -14,21 +14,19 @@
     "testStudent": "tsc && jest --detectOpenHandles --forceExit --runInBand ./dist/src/tests/student.test.js",
     "testFile": "tsc && jest --detectOpenHandles --forceExit --runInBand ./dist/src/tests/file.test.js"
   },
-  "author": "Eliav Menachi",
+  "author": "Reut bukra",
   "license": "ISC",
   "dependencies": {
     "@types/jest": "^29.2.2",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
-    "expo-image-picker": "^14.1.1",
     "express": "^4.18.2",
     "http": "*",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.10.2",
-    "multer": "^1.4.5-lts.1",
+    "multer": "*",
     "mz": "^2.7.0",
-    "request": "^2.88.2",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.5.4",
     "ts-jest": "^29.0.3"
